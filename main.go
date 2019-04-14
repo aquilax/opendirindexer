@@ -20,7 +20,10 @@ var ignoreRobots = flag.Bool("ingoreRobots", false, "Ignores robots.txt restrict
 var enableDebug = flag.Bool("debug", false, "Enable debugging")
 var userAgent = flag.String("userAgent", defaultUserAgent, "set user agent")
 
+// CommandLine is the default set of commands
 var CommandLine = flag.NewFlagSet(os.Args[0], flag.ExitOnError)
+
+// Usage prints a usage message documenting all defined command-line flags
 var Usage = func() {
 	fmt.Fprintf(CommandLine.Output(), "Usage of %s:\n", appName)
 	fmt.Fprintf(CommandLine.Output(), "%s [OPTIONS] URL\n", appName)

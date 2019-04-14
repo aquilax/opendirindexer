@@ -1,5 +1,7 @@
 # opendirindexer
 
+[![Go Report Card](https://goreportcard.com/badge/github.com/aquilax/opendirindexer)](https://goreportcard.com/report/github.com/aquilax/opendirindexer)
+
 Open directory indexer command line tool
 
 ## Installation
