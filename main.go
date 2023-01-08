@@ -1,8 +1,10 @@
 package main
 
 import (
+	"crypto/tls"
 	"flag"
 	"fmt"
+	"net/http"
 	"os"
 	"strings"
 
@@ -16,7 +18,8 @@ const defaultUserAgent = appName + "/1.0"
 
 var set map[string]bool
 
-var ignoreRobots = flag.Bool("ingoreRobots", false, "Ignores robots.txt restrictions")
+var ignoreRobots = flag.Bool("ignoreRobots", false, "Ignores robots.txt restrictions")
+var insecure = flag.Bool("insecure", false, "Allow insecure tls connections")
 var enableDebug = flag.Bool("debug", false, "Enable debugging")
 var userAgent = flag.String("userAgent", defaultUserAgent, "set user agent")
 
@@ -43,7 +46,7 @@ func mustIgnore(urlParam, link, linkFull string) bool {
 }
 
 func mustQueue(urlParam, link, linkFull string) bool {
-	return link[len(link)-1:] == "/"
+	return len(link) > 0 && link[len(link)-1:] == "/"
 }
 
 func mustKeep(urlParam, link, linkFull string) bool {
@@ -55,6 +58,7 @@ func mustKeep(urlParam, link, linkFull string) bool {
 }
 
 func main() {
+	output := os.Stdout
 	flag.Parse()
 	urlParam := flag.Arg(0)
 	if urlParam == "" {
@@ -78,6 +82,12 @@ func main() {
 		&queue.InMemoryQueueStorage{MaxSize: 10000},
 	)
 
+	if *insecure {
+		c.WithTransport(&http.Transport{
+			TLSClientConfig: &tls.Config{InsecureSkipVerify: true},
+		})
+	}
+
 	c.OnHTML("a[href]", func(e *colly.HTMLElement) {
 		link := e.Attr("href")
 		linkFull := e.Request.AbsoluteURL(link)
@@ -89,7 +99,7 @@ func main() {
 			return
 		}
 		if mustKeep(urlParam, link, linkFull) {
-			fmt.Println(linkFull)
+			fmt.Fprintln(output, linkFull)
 		}
 	})
 
